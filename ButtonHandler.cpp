@@ -4,6 +4,7 @@
 
 #include "ArduinoRotaryHandler.h"
 
+// Get the 
 ArduinoRotaryHandler * ArduinoRotaryHandler::getInstance() {
 	return &instance;
 }
@@ -182,7 +183,7 @@ void ArduinoRotaryHandler::f_ISR1Wrapper() {
 		if (!bitRead(*(instance.p_rotaryInterrupt1PortRegisterAddress), instance.m_rotaryInterrputPin1)) {
 #endif
 #ifdef ROTARY_TRIGGER_FALLING
-			if (!bitRead(*(instance.p_rotaryInterrupt1PortRegisterAddress), instance.m_rotaryInterrputPin1)) {
+			if (bitRead(*(instance.p_rotaryInterrupt1PortRegisterAddress), instance.m_rotaryInterrputPin1)) {
 #endif
 				instance.f_ISR2();
 			}

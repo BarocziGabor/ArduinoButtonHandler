@@ -5,36 +5,76 @@
 
 #include "arduino.h"
 
-// ===== Set interrupt trigger direction =====
+/*================================================================//
+================= USAGE ==========================================//
+==================================================================//
+																  //
+//In main code:													  //
+#include "ArduinoRotaryHandler.h"								  //
+																  //
+ArduinoRotaryHandler *rh = ArduinoRotaryHandler::getInstance();	  //
+void setup() {													  //
+	rh->initButton(PD4);										  //
+	rh->initRotary(PD2, PD3);									  //
+}																  //
+																  //
+void loop() {													  //
+	rh->handleButton([]() {});									  //
+}																  //
+																  //
+//In class:														  //
+#include "ArduinoRotaryHandler.h"								  //
+																  //
+class TestClass {												  //
+private:														  //
+	friend class ArduinoRotaryHandler;							  //
+	ArduinoRotaryHandler* rh;									  //
+public:															  //
+	TestClass() {												  //
+		rh = ArduinoRotaryHandler::getInstance();				  //
+	}															  //
+																  //
+	void init() {												  //
+		rh->initButton(PD4);									  //
+		rh->initRotary(PD2, PD3);								  //
+	}															  //
+																  //
+};																  //
+==================================================================*/
 
-// Interrupt set to RISING trigger
-#define ROTARY_TRIGGER_RISING
+/*=========================================*/
+/*=============== CONFIG ==================*/
+/*=========================================*/
+// ===== Set rotary logic level ===========//
+										   //
+// Interrupt set to RISING trigger	       //
+//#define ROTARY_TRIGGER_RISING		       //
+										   //
+// Interrupt set to FALLING trigger	       //
+#define ROTARY_TRIGGER_FALLING		       //
+// ========================================//
 
-// Interrupt set to FALLING trigger
-//#define ROTARY_TRIGGER_FALLING
-// ===========================================
-
-// ===========================================
-
-//#define BUTTON_ACTIVE_HIGH 
-#define BUTTON_ACTIVE_LOW 
-/* ===== Button circuit =====
-   ===== Active high =====			===== Active low =====
-	   ___ Vcc 						   ___ Vcc
-		|								|
-	   / 							  |‾‾‾|
-	  /  							  | R |
-		|							   ‾|‾
-		|—————— uController				|—————— uController
-		|								|
-	  |‾‾‾|							   /
-	  | R |							  /
-	   ‾|‾							    |
-	   ‾‾‾ GND						   ‾‾‾ GND
-*/
-// ===========================================
-
-
+// ===== Set button logic level ==============================//
+															  //
+//#define BUTTON_ACTIVE_HIGH								  //
+															  //
+#define BUTTON_ACTIVE_LOW									  //
+															  //
+/* ===== Button circuit =====								  //
+   ===== Active high =====			===== Active low =====	  //
+	   ___ Vcc 						   ___ Vcc				  //
+		|								|					  //
+	   / 							  |‾‾‾|					  //
+	  /  							  | R |					  //
+		|							   ‾|‾					  //
+		|—————— uController				|—————— uController	  //
+		|								|					  //
+	  |‾‾‾|							   /					  //
+	  | R |							  /						  //
+	   ‾|‾							    |					  //
+	   ‾‾‾ GND						   ‾‾‾ GND				  //
+*/															  //
+// ===========================================================//
 
 #define DEBUG_ROTARY
 #ifdef DEBUG_ROTARY
@@ -45,19 +85,23 @@
 #define DPRINT(x)
 #endif
 
-enum rotaryEvent_t {
+enum rotaryEvent_e {
 	RE_DOWN = -1,
 	RE_NULL = 0,
 	RE_UP = 1
 };
 
 class ArduinoRotaryHandler {
-protected:
+private:
+	//===== ELSE =====
+	static ArduinoRotaryHandler instance;
+	ArduinoRotaryHandler() {};
+
 	//===== ROTARY =====
 	bool m_rotaryInitialized;
 	uint8_t m_rotaryInterrputPin1;
 	uint8_t m_rotaryInterrputPin2;
-	volatile rotaryEvent_t m_rotaryEvent;
+	volatile rotaryEvent_e m_rotaryEvent;
 	volatile uint8_t *p_rotaryInterrupt1PortRegisterAddress;
 	volatile uint8_t *p_rotaryInterrupt2PortRegisterAddress;
 
@@ -77,10 +121,6 @@ protected:
 	uint8_t m_buttonPin;
 	volatile uint8_t *p_buttonPortRegisterAddress;
 
-	//===== ELSE =====
-	ArduinoRotaryHandler() {};
-	static ArduinoRotaryHandler instance;
-
 public:
 	static ArduinoRotaryHandler *getInstance();
 	void initButton(const uint8_t pin, const uint16_t debounceDelay = 100, const uint16_t longPressDelay = 1000);
@@ -90,8 +130,4 @@ public:
 	void handleButton(void(*shortPress)(), void(*longPress)());
 };
 
-
 #endif
-
-
-
